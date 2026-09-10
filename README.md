@@ -14,6 +14,13 @@ A blazingly fast, minimal wiki engine that doesn't suck.
 - **Auto header IDs** - Clickable headers for deep linking
 - **Smooth scrolling** - Navigate to sections seamlessly
 - **RSS & Atom feeds** - Subscribe to content updates
+- **Fuzzy search palette** - Hit `Ctrl+K` or the header search button to fuzzy-search pages and headings
+- **Now Playing** - Embedded YouTube player for playlists
+- **Copy buttons** - One-click copy on code blocks
+- **Reading progress** - Scroll progress bar and back-to-top button
+- **Page stats** - Per-page view counter plus a last-updated / reading-time line under each title
+- **Visitor counter** - Sidebar widget counting site visitors (once per session) via the free countapi service
+- **Activity graph** - GitHub-style contribution grid in the sidebar showing your daily blog activity (recorded whenever content files change)
 
 ## Setup
 
@@ -66,3 +73,19 @@ The server will be available at `http://localhost:3000` with feeds at:
 ### Feed Content
 
 Posts are generated from `.md` files in `content/`. Special files (`sidebar.md`, `top.md`, `home.md`) are excluded from feeds. The title is extracted from the first `# heading` in each file, or falls back to the filename. Publication date is derived from the file modification time.
+
+### Activity Graph
+
+The sidebar activity widget reads `activity.json`. It takes no build dependencies — activity is recorded whenever you change files under `content/` and rebuild:
+
+```bash
+npm run build:feeds
+```
+
+Or just the activity file:
+
+```bash
+npm run build:activity
+```
+
+Each build stores your content files' modification times as daily contributions, so the grid fills in over the days you actually touch the blog.

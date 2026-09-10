@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "A blazingly fast, minimal wiki engine",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "build:feeds": "node generate-feeds.js",
+    "build:activity": "node generate-activity.js"
   },
   "dependencies": {
     "express": "^4.18.2"

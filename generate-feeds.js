@@ -1,5 +1,4 @@
-import express from "express";
-import { readdirSync, statSync, readFileSync, mkdirSync, watch } from "fs";
+import { readdirSync, statSync, readFileSync, writeFileSync } from "fs";
 import { join, extname, basename } from "path";
 import { fileURLToPath } from "url";
 import { buildGalleryManifest } from "./gallery-builder.js";
@@ -7,25 +6,22 @@ import { buildActivity } from "./generate-activity.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const CONTENT_DIR = join(__dirname, "content");
-const IMAGES_DIR = join(CONTENT_DIR, "images");
-const GALLERY_OUT = join(__dirname, "gallery.json");
-const PORT = process.env.PORT || 3000;
-
-const app = express();
+const OUT_DIR = __dirname;
 
 let config = {};
 try {
   const raw = readFileSync(join(__dirname, "config.json"), "utf-8");
   config = JSON.parse(raw);
 } catch {
-  config = { siteName: "Markdownium Wiki", baseUrl: `http://localhost:${PORT}/` };
+  config = { siteName: "Robin's Nest", baseUrl: "" };
 }
 
-const siteUrl = config.baseUrl.replace(/\/$/, "");
+const siteUrl = (config.baseUrl || "").replace(/\/content\/?$/, "").replace(/\/$/, "");
 const feedUrl = `${siteUrl}/feed.rss`;
 const atomUrl = `${siteUrl}/feed.atom`;
 
 const EXCLUDED_FILES = new Set(["sidebar.md", "top.md", "home.md", "gallery-intro.md"]);
+const PAGE_EXCLUDED_FILES = new Set(["sidebar.md", "top.md", "gallery-intro.md"]);
 
 function getMarkdownFiles() {
   try {
@@ -54,7 +50,7 @@ function getMarkdownFiles() {
 }
 
 function escapeXml(str) {
-  return str
+  return String(str)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -66,23 +62,13 @@ function toRfc822(date) {
   return date.toUTCString();
 }
 
-app.use(express.static(__dirname));
-
-app.get("/content/:file.md", (req, res) => {
-  const filePath = join(CONTENT_DIR, `${req.params.file}.md`);
-  res.sendFile(filePath, {}, (err) => {
-    if (err) res.status(404).send("not found");
-  });
-});
-
-app.get("/feed.rss", (_req, res) => {
-  const items = getMarkdownFiles();
+function buildRss(items) {
   const now = new Date().toUTCString();
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>${escapeXml(config.siteName)}</title>
-    <link>${escapeXml(siteUrl)}</link>
+    <link>${escapeXml(siteUrl || "/")}</link>
     <description>${escapeXml(config.siteName)}</description>
     <lastBuildDate>${now}</lastBuildDate>
     <atom:link href="${escapeXml(feedUrl)}" rel="self" type="application/rss+xml" />
@@ -99,19 +85,18 @@ app.get("/feed.rss", (_req, res) => {
   }
   xml += `  </channel>
 </rss>`;
-  res.type("application/rss+xml").send(xml);
-});
+  return xml;
+}
 
-app.get("/feed.atom", (_req, res) => {
-  const items = getMarkdownFiles();
+function buildAtom(items) {
   const now = new Date().toISOString();
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>${escapeXml(config.siteName)}</title>
-  <link href="${escapeXml(siteUrl)}" />
+  <link href="${escapeXml(siteUrl || "/")}" />
   <link href="${escapeXml(atomUrl)}" rel="self" />
   <updated>${now}</updated>
-  <id>${escapeXml(siteUrl)}</id>
+  <id>${escapeXml(siteUrl || "/")}</id>
 `;
   for (const item of items) {
     xml += `  <entry>
@@ -124,54 +109,43 @@ app.get("/feed.atom", (_req, res) => {
 `;
   }
   xml += `</feed>`;
-  res.type("application/atom+xml").send(xml);
-});
-
-function rebuildGallery() {
-  const images = buildGalleryManifest(GALLERY_OUT, IMAGES_DIR);
-  console.log(`[gallery] rebuilt gallery.json (${images.length} images)`);
+  return xml;
 }
 
-function rebuildActivity() {
-  const data = buildActivity(
-    join(__dirname, "activity.json"),
-    CONTENT_DIR,
-  );
-  console.log(
-    `[activity] rebuilt activity.json (${Object.keys(data.days).length} active days)`,
-  );
-}
+const items = getMarkdownFiles();
 
-function debouncedWatcher(dir, label, rebuild) {
-  let timer = null;
-  const schedule = () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      clearTimeout(timer);
-      try {
-        rebuild();
-      } catch (err) {
-        console.error(`[${label}] rebuild failed: ${err.message}`);
-      }
-    }, 300);
-  };
-  try {
-    rebuild();
-    watch(dir, (_event, filename) => {
-      if (filename && filename.startsWith(".")) return;
-      schedule();
-    });
-    console.log(`[${label}] watching ${dir} for changes`);
-  } catch (err) {
-    console.error(`[${label}] watcher failed: ${err.message}`);
-  }
-}
+writeFileSync(join(OUT_DIR, "feed.rss"), buildRss(items));
+writeFileSync(join(OUT_DIR, "feed.atom"), buildAtom(items));
 
-app.listen(PORT, () => {
-  console.log(`Markdownium running at http://localhost:${PORT}`);
-  console.log(`RSS feed: ${feedUrl}`);
-  console.log(`Atom feed: ${atomUrl}`);
-  mkdirSync(IMAGES_DIR, { recursive: true });
-  debouncedWatcher(IMAGES_DIR, "gallery", rebuildGallery);
-  debouncedWatcher(CONTENT_DIR, "activity", rebuildActivity);
-});
+const pages = readdirSync(CONTENT_DIR)
+  .filter((f) => extname(f) === ".md" && !PAGE_EXCLUDED_FILES.has(f))
+  .map((f) => {
+    const content = readFileSync(join(CONTENT_DIR, f), "utf-8");
+    const titleMatch = content.match(/^#{1,6}\s+(.+)$/m);
+    const slug = basename(f, ".md");
+    return {
+      slug,
+      title: titleMatch ? titleMatch[1].trim() : slug,
+    };
+  });
+
+writeFileSync(join(OUT_DIR, "files.json"), JSON.stringify(pages, null, 2) + "\n");
+
+const galleryImages = buildGalleryManifest(
+  join(OUT_DIR, "gallery.json"),
+  join(CONTENT_DIR, "images"),
+);
+
+const activity = buildActivity(
+  join(OUT_DIR, "activity.json"),
+  CONTENT_DIR,
+);
+
+console.log(`Wrote feed.rss (${items.length} items) and feed.atom to ${OUT_DIR}`);
+console.log(`Wrote files.json (${pages.length} pages) to ${OUT_DIR}`);
+console.log(`Wrote gallery.json (${galleryImages.length} images) to ${OUT_DIR}`);
+console.log(
+  `Wrote activity.json (${Object.keys(activity.days).length} active days) to ${OUT_DIR}`,
+);
+console.log(`RSS: ${feedUrl}`);
+console.log(`Atom: ${atomUrl}`);

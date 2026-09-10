@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Robin&apos;s Nest</title>
+  <link href="https://files.obsidianos.xyz/~robin" />
+  <link href="https://files.obsidianos.xyz/~robin/feed.atom" rel="self" />
+  <updated>2026-09-06T02:45:55.062Z</updated>
+  <id>https://files.obsidianos.xyz/~robin</id>
+  <entry>
+    <title>Why I love Gentoo Linux</title>
+    <link href="https://files.obsidianos.xyz/~robin/#/gentoo-love" />
+    <id>https://files.obsidianos.xyz/~robin/#/gentoo-love</id>
+    <updated>2026-09-06T02:42:04.198Z</updated>
+    <summary>Why I love Gentoo Linux
+
+ What is a Gentoo?
+Gentoo is a source based Linux distro what that means is you have to compile all/most programs by source, now don&apos;t worry there are some packages like</summary>
+  </entry>
+  <entry>
+    <title>Music Box</title>
+    <link href="https://files.obsidianos.xyz/~robin/#/music" />
+    <id>https://files.obsidianos.xyz/~robin/#/music</id>
+    <updated>2026-09-06T02:25:07.027Z</updated>
+    <summary>Music Box
+
+A cozy box of songs and sounds I keep coming back to — click a track title to open it on YouTube.
+
+ On rotation
+
+- [turn it up (feat. 6arelyhuman)](https://youtu.be/QW9NenTTHI0)
+- [On</summary>
+  </entry>
+  <entry>
+    <title>What am I up to today?</title>
+    <link href="https://files.obsidianos.xyz/~robin/#/05-09-2026" />
+    <id>https://files.obsidianos.xyz/~robin/#/05-09-2026</id>
+    <updated>2026-09-05T18:27:24.492Z</updated>
+    <summary>What am I up to today?
+
+ Gentooit
+I am up to making a new system called Gentooit, which is &quot;packit for Gentoo Linux. Automate packaging upstream projects into Gentoo ebuilds — the same way packi</summary>
+  </entry>
+  <entry>
+    <title>Bluefin&apos;s New Maintainer!</title>
+    <link href="https://files.obsidianos.xyz/~robin/#/bluefin-maintainer" />
+    <id>https://files.obsidianos.xyz/~robin/#/bluefin-maintainer</id>
+    <updated>2026-09-04T18:10:55.931Z</updated>
+    <summary>Bluefin&apos;s New Maintainer!
+
+ What is a Bluefin??
+Bluefin is a Bootc based Linux supposed to kill the product of Linux Distros, the reason why is because we should just have what the cloud does wh</summary>
+  </entry>
+  <entry>
+    <title>The Gender Journey</title>
+    <link href="https://files.obsidianos.xyz/~robin/#/genderjourney" />
+    <id>https://files.obsidianos.xyz/~robin/#/genderjourney</id>
+    <updated>2026-06-24T00:51:26.395Z</updated>
+    <summary>The Gender Journey
+
+ The Start Of The Flight/Rant
+In my 19 years (So far) I have done lots of thinking and thinking with research about who I am. It has been quite an interesting journey for som</summary>
+  </entry>
+</feed>

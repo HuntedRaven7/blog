@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Robin&apos;s Nest</title>
+    <link>https://files.obsidianos.xyz/~robin</link>
+    <description>Robin&apos;s Nest</description>
+    <lastBuildDate>Sun, 06 Sep 2026 02:45:55 GMT</lastBuildDate>
+    <atom:link href="https://files.obsidianos.xyz/~robin/feed.rss" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Why I love Gentoo Linux</title>
+      <link>https://files.obsidianos.xyz/~robin/#/gentoo-love</link>
+      <guid isPermaLink="true">https://files.obsidianos.xyz/~robin/#/gentoo-love</guid>
+      <pubDate>Sun, 06 Sep 2026 02:42:04 GMT</pubDate>
+      <description>Why I love Gentoo Linux
+
+ What is a Gentoo?
+Gentoo is a source based Linux distro what that means is you have to compile all/most programs by source, now don&apos;t worry there are some packages like</description>
+    </item>
+    <item>
+      <title>Music Box</title>
+      <link>https://files.obsidianos.xyz/~robin/#/music</link>
+      <guid isPermaLink="true">https://files.obsidianos.xyz/~robin/#/music</guid>
+      <pubDate>Sun, 06 Sep 2026 02:25:07 GMT</pubDate>
+      <description>Music Box
+
+A cozy box of songs and sounds I keep coming back to — click a track title to open it on YouTube.
+
+ On rotation
+
+- [turn it up (feat. 6arelyhuman)](https://youtu.be/QW9NenTTHI0)
+- [On</description>
+    </item>
+    <item>
+      <title>What am I up to today?</title>
+      <link>https://files.obsidianos.xyz/~robin/#/05-09-2026</link>
+      <guid isPermaLink="true">https://files.obsidianos.xyz/~robin/#/05-09-2026</guid>
+      <pubDate>Sat, 05 Sep 2026 18:27:24 GMT</pubDate>
+      <description>What am I up to today?
+
+ Gentooit
+I am up to making a new system called Gentooit, which is &quot;packit for Gentoo Linux. Automate packaging upstream projects into Gentoo ebuilds — the same way packi</description>
+    </item>
+    <item>
+      <title>Bluefin&apos;s New Maintainer!</title>
+      <link>https://files.obsidianos.xyz/~robin/#/bluefin-maintainer</link>
+      <guid isPermaLink="true">https://files.obsidianos.xyz/~robin/#/bluefin-maintainer</guid>
+      <pubDate>Fri, 04 Sep 2026 18:10:55 GMT</pubDate>
+      <description>Bluefin&apos;s New Maintainer!
+
+ What is a Bluefin??
+Bluefin is a Bootc based Linux supposed to kill the product of Linux Distros, the reason why is because we should just have what the cloud does wh</description>
+    </item>
+    <item>
+      <title>The Gender Journey</title>
+      <link>https://files.obsidianos.xyz/~robin/#/genderjourney</link>
+      <guid isPermaLink="true">https://files.obsidianos.xyz/~robin/#/genderjourney</guid>
+      <pubDate>Wed, 24 Jun 2026 00:51:26 GMT</pubDate>
+      <description>The Gender Journey
+
+ The Start Of The Flight/Rant
+In my 19 years (So far) I have done lots of thinking and thinking with research about who I am. It has been quite an interesting journey for som</description>
+    </item>
+  </channel>
+</rss>
