@@ -30,12 +30,12 @@ function parseTop(content: string): { href: string; text: string }[] {
 }
 
 try {
-	const { readLocalMarkdown } = await import('../utils/content.ts');
+	const { readLocalMarkdown, fetchWithHeaders } = await import('../utils/content.ts');
 	const localContent = readLocalMarkdown('top');
 	if (localContent) {
 		topLinks = parseTop(localContent);
 	} else {
-		const res = await fetch(`${CONTENT_BASE}/top.md`);
+		const res = await fetchWithHeaders(`${CONTENT_BASE}/top.md`);
 		if (res.ok) {
 			const content = await res.text();
 			topLinks = parseTop(content);
