@@ -6,13 +6,7 @@ export interface NoteNode {
 }
 
 const EXCLUDED = new Set(['home', 'sidebar', 'top', 'gallery-intro', 'graph']);
-const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
-
-async function fetchText(url: string): Promise<string> {
-	const res = await fetch(url);
-	if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
-	return res.text();
-}
+import { fetchWithHeaders } from './content.ts';
 
 function parseTitle(content: string): string {
 	const match = content.match(/^#\s+(.+)$/m);
