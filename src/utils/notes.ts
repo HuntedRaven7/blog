@@ -6,6 +6,8 @@ export interface NoteNode {
 }
 
 const EXCLUDED = new Set(['home', 'sidebar', 'top', 'gallery-intro', 'graph']);
+const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
+
 import { fetchWithHeaders } from './content.ts';
 
 function parseTitle(content: string): string {
