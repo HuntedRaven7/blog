@@ -2,7 +2,7 @@
 import { SITE_TITLE } from '../consts';
 import { processMarkdown } from '../utils/markdown';
 import siteIcon from '../assets/site-icon.jpg';
-import { readLocalMarkdown } from '../utils/content.ts';
+import { readLocalMarkdown, fetchWithHeaders } from '../utils/content.ts';
 import ViewCounter from './ViewCounter.astro';
 
 const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
