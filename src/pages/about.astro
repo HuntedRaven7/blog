@@ -1,0 +1,62 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+---
+
+<Layout title={`About — ${SITE_TITLE}`} description={SITE_DESCRIPTION}>
+	<section id="about" class="wrap section">
+		<header class="section-head">
+			<p class="label">// about</p>
+			<h2 class="display section-title">About Robin</h2>
+		</header>
+		<div class="about-grid">
+			<div class="about-bio">
+				<p>
+					Hi, I am a dev that loves helping with open source! Whether it's something container native or a tool that helps others I will either build it or help, I just want to see open source flourish especially cloud native tech!
+				</p>
+				<p>
+					Whatever it may be you can count on me to build it!
+				</p>
+				<div class="facts">
+					<div class="fact">
+						<span class="label">uptime</span>
+						<span class="mono">since 2007</span>
+					</div>
+					<div class="fact">
+						<span class="label">shell</span>
+						<span class="mono">bash+starship</span>
+					</div>
+					<div class="fact">
+						<span class="label">locale</span>
+						<span class="mono">Canada, Maple Mountains</span>
+					</div>
+				</div>
+			</div>
+			<div class="about-skills">
+				<p class="label">// container tooling</p>
+				<ul class="skill-list">
+					<li>
+						<span class="skill-name">Podman</span>
+						<span class="skill-bar">█████</span>
+					</li>
+					<li>
+						<span class="skill-name">Bluefin</span>
+						<span class="skill-bar">█████</span>
+					</li>
+					<li>
+						<span class="skill-name">k0s</span>
+						<span class="skill-bar">████░</span>
+					</li>
+					<li>
+						<span class="skill-name">Bootc</span>
+						<span class="skill-bar">████░</span>
+					</li>
+					<li>
+						<span class="skill-name">Containerfiles</span>
+						<span class="skill-bar">███░░</span>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</section>
+</Layout>

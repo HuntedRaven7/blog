@@ -1,0 +1,35 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+---
+
+<Layout title={`Lab — ${SITE_TITLE}`} description={SITE_DESCRIPTION}>
+	<section id="lab" class="wrap section">
+		<header class="section-head">
+			<p class="label">// 04 · lab</p>
+			<h2 class="display section-title">The lab, welcome to my Homelab.</h2>
+		</header>
+		<div class="lab-grid">
+			<div class="lab-card">
+				<span class="label lab-state">running</span>
+				<h3 class="display lab-title">Vaultwarden</h3>
+				<p class="lab-desc">self-hosted password manager — a lightweight Bitwarden-compatible server.</p>
+			</div>
+			<div class="lab-card">
+				<span class="label lab-state">tool</span>
+				<h3 class="display lab-title">k0s</h3>
+				<p class="lab-desc">lightweight Kubernetes distribution I use to run the cluster underneath the lab.</p>
+			</div>
+			<div class="lab-card">
+				<span class="label lab-state">running</span>
+				<h3 class="display lab-title">Pi-hole</h3>
+				<p class="lab-desc">network-wide ad blocker and local DNS, quietly filtering at the edge.</p>
+			</div>
+			<div class="lab-card">
+				<span class="label lab-state">running</span>
+				<h3 class="display lab-title">Homepage</h3>
+				<p class="lab-desc">a clean dashboard that fronts every service in one place.</p>
+			</div>
+		</div>
+	</section>
+</Layout>

@@ -1,89 +1,63 @@
-![Logo](https://github.com/markdownium.png)
-# Markdownium
+# Astro Starter Kit: Blog
 
-A blazingly fast, minimal wiki engine that doesn't suck.
-
-## Features
-
-- **Client-side rendering** - No server-side processing required
-- **Hash-based routing** - Clean URLs like `/#/page` and `/#/page#header` (just like [Holo.js](https://holo.js.org))
-- **Syntax highlighting** - Code blocks with Highlight.js
-- **Dark theme** - Modern minimal design
-- **Responsive** - Mobile-friendly layout
-- **XSS protection** - Safe content rendering
-- **Auto header IDs** - Clickable headers for deep linking
-- **Smooth scrolling** - Navigate to sections seamlessly
-- **RSS & Atom feeds** - Subscribe to content updates
-- **Fuzzy search palette** - Hit `Ctrl+K` or the header search button to fuzzy-search pages and headings
-- **Now Playing** - Embedded YouTube player for playlists
-- **Copy buttons** - One-click copy on code blocks
-- **Reading progress** - Scroll progress bar and back-to-top button
-- **Page stats** - Per-page view counter plus a last-updated / reading-time line under each title
-- **Visitor counter** - Sidebar widget counting site visitors (once per session) via the free countapi service
-- **Activity graph** - GitHub-style contribution grid in the sidebar showing your daily blog activity (recorded whenever content files change)
-
-## Setup
-
-1. Copy `config.json.def` to `config.json`
-2. Configure your settings
-3. Place Markdown files in `content/` directory
-4. Run with Node.js:
-   ```bash
-   node server.js
-   ```
-
-## Configuration
-
-```json
-{
-  "siteName": "Your Wiki Name",
-  "logo": "https://example.com/logo.png",
-  "baseUrl": "http://raw.githubusercontent.com/USERNAME/REPO/refs/head/main",
-  "licenseBadge": "<a href=\"license-url\"><img src=\"badge-url\"></a>"
-}
+```sh
+npm create astro@latest -- --template blog
 ```
 
-## Content
+> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
 
-- Create `.md` files (duh)
-- `home.md` is the default page
-- `sidebar.md` for sidebar navigation
-- `top.md` for top navigation links
-- Internal links: `[Text](/#/page-name)` or `[Text](/page-name)`
+Features:
 
-## Deployment
+- ✅ Minimal styling (make it your own!)
+- ✅ 100/100 Lighthouse performance
+- ✅ SEO-friendly with canonical URLs and Open Graph data
+- ✅ Sitemap support
+- ✅ RSS Feed support
+- ✅ Markdown & MDX support
 
-Deploy to any static hosting service - GitHub Pages, Netlify, Vercel, etc. No server requirements beyond serving static files.
+## 🚀 Project Structure
 
-### Development Server with Feeds
+Inside of your Astro project, you'll see the following folders and files:
 
-To enable RSS and Atom feeds locally:
-
-```bash
-npm install
-npm start
+```text
+├── public/
+├── src/
+│   ├── assets/
+│   ├── components/
+│   ├── content/
+│   ├── layouts/
+│   └── pages/
+├── astro.config.mjs
+├── README.md
+├── package.json
+└── tsconfig.json
 ```
 
-The server will be available at `http://localhost:3000` with feeds at:
-- RSS: `http://localhost:3000/feed.rss`
-- Atom: `http://localhost:3000/feed.atom`
+Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
 
-### Feed Content
+There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
 
-Posts are generated from `.md` files in `content/`. Special files (`sidebar.md`, `top.md`, `home.md`) are excluded from feeds. The title is extracted from the first `# heading` in each file, or falls back to the filename. Publication date is derived from the file modification time.
+The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
 
-### Activity Graph
+Any static assets, like images, can be placed in the `public/` directory.
 
-The sidebar activity widget reads `activity.json`. It takes no build dependencies — activity is recorded whenever you change files under `content/` and rebuild:
+## 🧞 Commands
 
-```bash
-npm run build:feeds
-```
+All commands are run from the root of the project, from a terminal:
 
-Or just the activity file:
+| Command                   | Action                                           |
+| :------------------------ | :----------------------------------------------- |
+| `npm install`             | Installs dependencies                            |
+| `npm run dev`             | Starts local dev server at `localhost:4321`      |
+| `npm run build`           | Build your production site to `./dist/`          |
+| `npm run preview`         | Preview your build locally, before deploying     |
+| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
+| `npm run astro -- --help` | Get help using the Astro CLI                     |
 
-```bash
-npm run build:activity
-```
+## 👀 Want to learn more?
 
-Each build stores your content files' modification times as daily contributions, so the grid fills in over the days you actually touch the blog.
+Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+
+## Credit
+
+This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).

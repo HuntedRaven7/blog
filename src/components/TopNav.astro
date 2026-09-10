@@ -1,0 +1,41 @@
+---
+const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
+
+let topLinks: { href: string; text: string }[] = [];
+
+try {
+	const res = await fetch(`${CONTENT_BASE}/top.md`);
+	if (res.ok) {
+		const content = await res.text();
+		const lines = content.split('\n');
+		for (const line of lines) {
+			const parts = line.split('%GAP%');
+			for (const part of parts) {
+				const match = part.trim().match(/^\s*\[([^\]]+)\]\(([^)]+)\)\s*$/);
+				if (match) {
+					const text = match[1].trim();
+					let href = match[2].trim();
+					if (href.startsWith('http://') || href.startsWith('https://')) {
+						// keep external links as-is
+					} else if (href.startsWith('/')) {
+						const cleaned = href.replace(/^\/+/, '');
+						const slug = cleaned === 'home' ? '' : cleaned;
+						href = `/blog/${slug}`;
+					} else {
+						href = `/blog/${href}`;
+					}
+					topLinks.push({ href, text });
+				}
+			}
+		}
+	}
+} catch (e) {
+	console.error('Failed to load top.md:', e);
+}
+---
+
+<nav class="top-nav" aria-label="Top">
+	{topLinks.map((link) => (
+		<a class="top-nav-link" href={link.href}>{link.text}</a>
+	))}
+</nav>

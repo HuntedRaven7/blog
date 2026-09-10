@@ -1,0 +1,74 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { extractTitle } from '../utils/markdown';
+
+const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
+
+function extractMarkdownFiles(html: string): string[] {
+	const regex = /<a href="([^"]+\.md)"/g;
+	const files: string[] = [];
+	let match;
+	while ((match = regex.exec(html)) !== null) {
+		const href = match[1];
+		const name = href.split('/').pop() || href;
+		if (name.endsWith('.md')) {
+			files.push(name);
+		}
+	}
+	return files;
+}
+
+async function getMarkdownFiles() {
+	const EXCLUDED = new Set(['home', 'sidebar', 'top', 'gallery-intro', 'graph']);
+	try {
+		const indexRes = await fetch(CONTENT_BASE);
+		if (!indexRes.ok) throw new Error(`Failed to fetch index: ${indexRes.status}`);
+		const indexHtml = await indexRes.text();
+		const files = extractMarkdownFiles(indexHtml)
+			.filter((f) => !EXCLUDED.has(f.replace('.md', '')));
+
+		const posts = await Promise.all(
+			files.map(async (f) => {
+				const slug = f.replace('.md', '');
+				const contentRes = await fetch(`${CONTENT_BASE}/${f}`);
+				if (!contentRes.ok) throw new Error(`Failed to fetch ${f}`);
+				const content = await contentRes.text();
+				const title = extractTitle(content) || slug;
+				const pubDate = contentRes.headers.get('last-modified') || new Date().toISOString();
+				return { slug, title, pubDate: new Date(pubDate) };
+			})
+		);
+
+		return posts.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
+	} catch (e) {
+		console.error('Failed to load markdown files from remote:', e);
+		return [];
+	}
+}
+
+const blogFiles = await getMarkdownFiles();
+---
+
+<Layout title={`RSS Feed — Robin`} description="RSS feed for the blog.">
+	<section id="rss" class="wrap section">
+		<header class="section-head">
+			<p class="label">// 03 · rss feed</p>
+			<h2 class="display section-title">RSS straight from my blog!</h2>
+		</header>
+		<div class="rows">
+			{blogFiles.map((post) => (
+				<a class="row row-link link" href={`/blog/${post.slug}`}>
+					<span class="label row-date">{post.pubDate.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.')}</span>
+					<div>
+						<span class="display row-title">{post.title}</span>
+					</div>
+					<span class="row-arrow" aria-hidden="true">→</span>
+				</a>
+			))}
+		</div>
+		<div style="margin-top: 2rem;">
+			<a class="btn btn-ghost" href="/blog/feed.rss" target="_blank" rel="noopener noreferrer">RSS Feed</a>
+			<a class="btn btn-ghost" href="/blog/feed.atom" target="_blank" rel="noopener noreferrer" style="margin-left: 0.5rem;">Atom Feed</a>
+		</div>
+	</section>
+</Layout>

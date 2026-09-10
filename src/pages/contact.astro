@@ -1,0 +1,20 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+---
+
+<Layout title={`Contact — ${SITE_TITLE}`} description={SITE_DESCRIPTION}>
+	<section id="contact" class="wrap section">
+		<header class="section-head">
+			<p class="label">// 05 · contact</p>
+			<h2 class="display section-title">Open channels.</h2>
+		</header>
+		<div class="rows">
+			<a class="row row-link link" href="https://github.com/huntedraven7" target="_blank" rel="noopener noreferrer">
+				<span class="label row-date">github</span>
+				<span class="display row-title">@huntedraven7</span>
+				<span class="row-arrow" aria-hidden="true">→</span>
+			</a>
+		</div>
+	</section>
+</Layout>

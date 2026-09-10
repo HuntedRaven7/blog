@@ -1,0 +1,191 @@
+---
+import { getNotes } from '../utils/notes';
+
+export interface NoteNode {
+	id: string;
+	title: string;
+	excerpt: string;
+}
+
+export interface GraphLink {
+	source: string;
+	target: string;
+}
+
+interface Props {
+	nodes: NoteNode[];
+	links: GraphLink[];
+}
+
+const { nodes, links }: Props = Astro.props;
+
+const graphDataJson = JSON.stringify({ nodes, links });
+---
+
+<div id="graph-container" class="graph-container">
+	<div id="graph-canvas" class="graph-canvas"></div>
+	<div id="graph-tooltip" class="graph-tooltip"></div>
+</div>
+
+<script type="application/json" id="graph-data" set:html={graphDataJson}></script>
+
+<script type="module">
+	import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
+
+	const container = document.getElementById('graph-container');
+	const canvas = document.getElementById('graph-canvas');
+	const tooltip = document.getElementById('graph-tooltip');
+	const dataScript = document.getElementById('graph-data');
+
+	if (!container || !canvas || !tooltip || !dataScript) {
+		console.error('Graph elements not found');
+		throw new Error('Graph elements not found');
+	}
+
+	let graphData;
+	try {
+		graphData = JSON.parse(dataScript.textContent || '{}');
+		console.error('Graph data loaded:', graphData.nodes.length, 'nodes,', graphData.links.length, 'links');
+	} catch (e) {
+		console.error('Failed to parse graph data:', e);
+		throw e;
+	}
+
+	const rect = container.getBoundingClientRect();
+	const width = rect.width || 800;
+	const height = 500;
+
+	const svg = d3.select('#graph-canvas')
+		.append('svg')
+		.attr('width', '100%')
+		.attr('height', '100%')
+		.attr('viewBox', [0, 0, width, height])
+		.attr('preserveAspectRatio', 'xMidYMid meet');
+
+	const g = svg.append('g');
+
+	const zoom = d3.zoom()
+		.scaleExtent([0.3, 3])
+		.on('zoom', (event) => {
+			g.attr('transform', event.transform);
+		});
+
+	svg.call(zoom);
+
+	const colors = [
+		'#e06c75',
+		'#98c379',
+		'#e5c07b',
+		'#61afef',
+		'#c678dd',
+		'#56b6c2',
+		'#d19a66',
+		'#be5046',
+	];
+
+	const link = g.append('g')
+		.attr('class', 'links')
+		.selectAll('line')
+		.data(graphData.links)
+		.enter()
+		.append('line')
+		.attr('stroke', 'rgba(115, 206, 244, 0.6)')
+		.attr('stroke-width', 2);
+
+	const node = g.append('g')
+		.attr('class', 'nodes')
+		.selectAll('g')
+		.data(graphData.nodes)
+		.enter()
+		.append('g')
+		.attr('class', 'graph-node')
+		.call(d3.drag()
+			.on('start', dragstarted)
+			.on('drag', dragged)
+			.on('end', dragended));
+
+	node.append('circle')
+		.attr('r', 10)
+		.attr('fill', 'var(--bg-surface0)')
+		.style('stroke', (d, i) => colors[i % colors.length])
+		.attr('stroke-width', 1.5)
+		.on('mouseover', function(event, d) {
+			d3.select(this)
+				.transition()
+				.duration(200)
+				.attr('r', 14)
+				.style('stroke', 'var(--accent)');
+
+			const note = graphData.nodes.find((n) => n.id === d.id);
+			if (note) {
+				const backlinks = graphData.links.filter((l) => l.target === d.id).length;
+				tooltip.innerHTML = `
+					<p class="graph-tooltip-title">${note.title}</p>
+					<p class="graph-tooltip-excerpt">${note.excerpt.slice(0, 100)}...</p>
+					<p class="graph-tooltip-links">${backlinks} backlinks</p>
+				`;
+				tooltip.style.display = 'block';
+			}
+		})
+		.on('mouseout', function(event, d) {
+			d3.select(this)
+				.transition()
+				.duration(200)
+				.attr('r', 10)
+				.style('stroke', colors[d.index % colors.length]);
+			tooltip.style.display = 'none';
+		})
+		.on('click', (event, d) => {
+			window.location.href = `/blog/${d.id}`;
+		});
+
+	node.append('text')
+		.text((d) => d.title.length > 20 ? d.title.slice(0, 18) + '...' : d.title)
+		.attr('x', 14)
+		.attr('y', 4)
+		.attr('font-family', "'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace")
+		.attr('font-size', '12px')
+		.attr('fill', 'var(--text-sub0)')
+		.attr('pointer-events', 'none');
+
+	const simulation = d3.forceSimulation(graphData.nodes)
+		.force('link', d3.forceLink(graphData.links).id((d) => d.id).distance(140))
+		.force('charge', d3.forceManyBody().strength(-500))
+		.force('center', d3.forceCenter(width / 2, height / 2))
+		.force('collision', d3.forceCollide().radius(35));
+
+	simulation.on('tick', () => {
+		link
+			.attr('x1', (d) => d.source.x)
+			.attr('y1', (d) => d.source.y)
+			.attr('x2', (d) => d.target.x)
+			.attr('y2', (d) => d.target.y);
+
+		node.attr('transform', (d) => `translate(${d.x},${d.y})`);
+	});
+
+	function dragstarted(event, d) {
+		if (!event.active) simulation.alphaTarget(0.3).restart();
+		d.fx = d.x;
+		d.fy = d.y;
+	}
+
+	function dragged(event, d) {
+		d.fx = event.x;
+		d.fy = event.y;
+	}
+
+	function dragended(event, d) {
+		if (!event.active) simulation.alphaTarget(0);
+		d.fx = null;
+		d.fy = null;
+	}
+
+	container.addEventListener('mousemove', (event) => {
+		const rect = container.getBoundingClientRect();
+		const x = event.clientX - rect.left;
+		const y = event.clientY - rect.top;
+		tooltip.style.left = `${x + 15}px`;
+		tooltip.style.top = `${y + 15}px`;
+	});
+</script>

@@ -1,0 +1,114 @@
+---
+import '../styles/global.css';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import Sidebar from '../components/Sidebar.astro';
+import TopNav from '../components/TopNav.astro';
+
+const { title, description } = Astro.props;
+const pageTitle = title ? `${title} — ${SITE_TITLE}` : SITE_TITLE;
+const pageDesc = description || SITE_DESCRIPTION;
+---
+
+<html lang="en" data-theme="dark">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Geist:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+		<title>{pageTitle}</title>
+		<meta name="description" content={pageDesc} />
+		<script>
+			(function () {
+				var root = document.documentElement;
+				var saved = null;
+				try {
+					saved = localStorage.getItem('hr7-theme');
+				} catch (e) {}
+				root.dataset.theme = saved === 'light' ? 'light' : 'dark';
+			})();
+		</script>
+	</head>
+	<body>
+	<div class="site">
+		<Sidebar />
+		<main>
+			<button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+				<span class="sidebar-toggle-bar"></span>
+				<span class="sidebar-toggle-bar"></span>
+				<span class="sidebar-toggle-bar"></span>
+			</button>
+			<TopNav />
+			<slot />
+				<footer class="footer">
+					<div class="footer-inner">
+						<span class="label">Robin</span>
+						<span class="label">built with astro · solar powered</span>
+						<span class="label">press <kbd style="background:var(--bg-surface1);border-radius:4px;padding:0.1rem 0.4rem;font-size:0.72rem;border:1px solid var(--border-bright)">T</kbd> for theme</span>
+					</div>
+				</footer>
+			</main>
+		</div>
+		<script>
+			(function () {
+				var root = document.documentElement;
+				function apply(theme) {
+					root.dataset.theme = theme;
+					try {
+						localStorage.setItem('hr7-theme', theme);
+					} catch (e) {}
+				}
+				function toggle() {
+					apply(root.dataset.theme === 'dark' ? 'light' : 'dark');
+				}
+				document.addEventListener('click', function (e) {
+					if (e.target && e.target.closest && e.target.closest('#theme-toggle')) {
+						toggle();
+					}
+				});
+				document.addEventListener('keydown', function (e) {
+					if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase() === 't') {
+						toggle();
+					}
+				});
+			})();
+		</script>
+		<script>
+			(function () {
+				var body = document.body;
+				var toggle = document.getElementById('sidebar-toggle');
+				var sidebar = document.querySelector('.side');
+				var stored = null;
+				try {
+					stored = localStorage.getItem('hr7-sidebar');
+				} catch (e) {}
+				if (stored === 'closed') {
+					body.classList.add('sidebar-closed');
+					body.classList.remove('sidebar-open');
+				} else {
+					body.classList.add('sidebar-open');
+					body.classList.remove('sidebar-closed');
+				}
+				if (toggle && sidebar) {
+					toggle.addEventListener('click', function () {
+						if (body.classList.contains('sidebar-open')) {
+							body.classList.remove('sidebar-open');
+							body.classList.add('sidebar-closed');
+							try {
+								localStorage.setItem('hr7-sidebar', 'closed');
+							} catch (e) {}
+						} else {
+							body.classList.remove('sidebar-closed');
+							body.classList.add('sidebar-open');
+							try {
+								localStorage.setItem('hr7-sidebar', 'open');
+							} catch (e) {}
+						}
+					});
+				}
+			})();
+		</script>
+	</body>
+</html>

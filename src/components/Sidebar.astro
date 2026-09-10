@@ -1,0 +1,71 @@
+---
+import { SITE_TITLE } from '../consts';
+import { processMarkdown } from '../utils/markdown';
+import siteIcon from '../assets/site-icon.jpg';
+import ViewCounter from './ViewCounter.astro';
+
+const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
+
+let sidebarLinks: { href: string; text: string }[] = [];
+
+try {
+	const res = await fetch(`${CONTENT_BASE}/sidebar.md`);
+	if (res.ok) {
+		const content = await res.text();
+		const lines = content.split('\n');
+		let idx = 0;
+		for (const line of lines) {
+			const match = line.match(/^\s*\[([^\]]+)\]\(([^)]+)\)\s*$/);
+			if (match) {
+				idx++;
+				const text = match[1].trim();
+				let href = match[2].trim();
+				if (href.startsWith('http://') || href.startsWith('https://')) {
+					// keep external links as-is
+				} else if (href.startsWith('/')) {
+					const cleaned = href.replace(/^\/+/, '');
+					const slug = cleaned === 'home' ? '' : cleaned;
+					href = `/blog/${slug}`;
+				} else {
+					href = `/blog/${href}`;
+				}
+				sidebarLinks.push({ href, text });
+			}
+		}
+	}
+} catch (e) {
+	console.error('Failed to load sidebar.md:', e);
+}
+
+const fallbackLinks = [
+	{ href: '/blog/', text: 'Home', idx: '01' },
+	{ href: '/blog/', text: 'Blog', idx: '02' },
+];
+
+const links = sidebarLinks.length > 0 ? sidebarLinks : fallbackLinks;
+---
+
+<aside class="side">
+	<div class="side-brand">
+		<a class="link brand-inner" href="/blog/">
+			<img class="brand-pfp" src={siteIcon.src} alt="Robin" width="40" height="40" />
+			<span class="brand-name display">{SITE_TITLE}</span>
+		</a>
+		<p class="label side-tag">not a pro writer</p>
+	</div>
+	<nav class="side-nav" aria-label="Primary">
+		{links.map((link, i) => (
+			<a class="link nav-link" href={link.href}>
+				<span class="nav-idx" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span> {link.text}
+			</a>
+		))}
+	</nav>
+	<div class="side-foot">
+		<button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle color theme (press T)">
+			<kbd aria-hidden="true">T</kbd>
+			<span class="theme-name">theme</span>
+		</button>
+		<p class="label side-stamp">est. 2026</p>
+		<ViewCounter />
+	</div>
+</aside>

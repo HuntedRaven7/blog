@@ -1,0 +1,16 @@
+---
+let count = '...';
+---
+
+<span class="view-counter" id="view-counter">visits: ...</span>
+
+<script>
+	(function () {
+		var el = document.getElementById('view-counter');
+		if (!el) return;
+		var stored = localStorage.getItem('visitCount');
+		var count = stored ? parseInt(stored, 10) + 1 : 1;
+		localStorage.setItem('visitCount', count.toString());
+		el.textContent = 'visits: ' + count;
+	})();
+</script>

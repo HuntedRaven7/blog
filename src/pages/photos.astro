@@ -1,0 +1,56 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
+
+function extractFiles(html: string): string[] {
+	const regex = /<a href="([^"]+)"/g;
+	const files: string[] = [];
+	let match;
+	while ((match = regex.exec(html)) !== null) {
+		const href = match[1];
+		const name = href.split('/').pop() || href;
+		if (name && !name.endsWith('/') && !name.startsWith('?') && !name.startsWith('Parent')) {
+			files.push(name);
+		}
+	}
+	return files;
+}
+
+let images: { filename: string; url: string }[] = [];
+
+try {
+	const indexRes = await fetch(`${CONTENT_BASE}/images/`);
+	if (indexRes.ok) {
+		const indexHtml = await indexRes.text();
+		const files = extractFiles(indexHtml)
+			.filter((f) => /\.(png|jpe?g|gif|webp|svg)$/i.test(f))
+			.map((f) => ({
+				filename: f,
+				url: `/blog/images/${f}`,
+			}))
+			.sort((a, b) => a.filename.localeCompare(b.filename));
+		images = files;
+	}
+} catch (e) {
+	console.error('Failed to load images:', e);
+}
+---
+
+<Layout title={`Photos — Robin`} description="Photo gallery">
+	<section class="wrap section">
+		<header class="section-head">
+			<p class="label">// photos</p>
+			<h2 class="display section-title">Gallery</h2>
+		</header>
+		<div class="gallery-grid">
+			{images.map((image) => (
+				<a class="gallery-item" href={image.url} target="_blank" rel="noopener noreferrer">
+					<img src={image.url} alt={image.filename} loading="lazy" />
+					<span class="gallery-filename">{image.filename}</span>
+				</a>
+			))}
+		</div>
+		{images.length === 0 && <p style="color: var(--text-sub1);">No images found.</p>}
+	</section>
+</Layout>

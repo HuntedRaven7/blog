@@ -1,0 +1,76 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { renderMarkdownToHtml, extractTitle } from '../utils/markdown';
+
+export async function getStaticPaths() {
+	const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
+	const EXCLUDED_SLUGS = new Set(['home', 'sidebar', 'top', 'gallery-intro', 'graph']);
+	try {
+		const indexRes = await fetch(CONTENT_BASE);
+		if (!indexRes.ok) throw new Error(`Failed to fetch index: ${indexRes.status}`);
+		const indexHtml = await indexRes.text();
+		const regex = /<a href="([^"]+\.md)"/g;
+		const files: string[] = [];
+		let match;
+		while ((match = regex.exec(indexHtml)) !== null) {
+			const href = match[1];
+			const name = href.split('/').pop() || href;
+			if (name.endsWith('.md')) {
+				files.push(name);
+			}
+		}
+		const slugs = files
+			.filter((f) => !EXCLUDED_SLUGS.has(f.replace('.md', '')))
+			.map((f) => f.replace('.md', ''));
+		return slugs.map((slug) => ({
+			params: { slug },
+		}));
+	} catch (e) {
+		console.error('getStaticPaths error:', e);
+		return [];
+	}
+}
+
+async function getPostBySlug(slug: string) {
+	const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
+	try {
+		const contentRes = await fetch(`${CONTENT_BASE}/${slug}.md`);
+		if (!contentRes.ok) throw new Error(`Failed to fetch post: ${contentRes.status}`);
+		const content = await contentRes.text();
+		const title = extractTitle(content) || slug;
+		const description = content.slice(0, 200).replace(/[#*_`]/g, '').trim();
+		const html = renderMarkdownToHtml(content, '/blog');
+		return { title, description, html };
+	} catch (e) {
+		console.error(`Failed to load post ${slug}:`, e);
+		return null;
+	}
+}
+
+const { slug } = Astro.params;
+const post = await getPostBySlug(slug || '');
+
+if (!post) {
+	Astro.response.status = 404;
+}
+---
+
+<Layout title={post?.title || 'Post'} description={post?.description || ''}>
+	<article class="wrap section">
+		<header>
+			<p class="label">// blog</p>
+			<h1 class="display" style="font-size: clamp(1.8rem, 4vw, 2.5rem); margin: 0.3rem 0 0.5rem; color: var(--text);">
+				{post?.title || 'Post not found'}
+			</h1>
+			<div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+			</div>
+		</header>
+		{post ? (
+			<div class="prose" set:html={post.html} />
+		) : (
+			<div class="prose">
+				<p>Post not found. <a href="/blog/">Return to home</a>.</p>
+			</div>
+		)}
+	</article>
+</Layout>

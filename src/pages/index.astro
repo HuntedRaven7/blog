@@ -1,0 +1,69 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getNotes } from '../utils/notes';
+import Graph, { type NoteNode, type GraphLink } from '../components/Graph.astro';
+import { renderMarkdownToHtml } from '../utils/markdown';
+
+const notes = await getNotes();
+const noteMap = new Map(notes.map((n) => [n.slug, n]));
+
+const nodes: NoteNode[] = notes.map((n) => ({ id: n.slug, title: n.title, excerpt: n.excerpt }));
+
+const links: GraphLink[] = [];
+try {
+	const res = await fetch('https://files.obsidianos.xyz/~robin/blog/content/graph.md');
+	if (res.ok) {
+		const content = await res.text();
+		const lines = content.split('\n');
+		for (const line of lines) {
+			const match = line.match(/^(.+?)\s*->\s*(.+)$/);
+			if (match) {
+				const source = match[1].trim().replace(/^\/+/, '').replace(/\.md$/, '');
+				const target = match[2].trim().replace(/^\/+/, '').replace(/\.md$/, '');
+				if (noteMap.has(source) && noteMap.has(target)) {
+					links.push({ source, target });
+				}
+			}
+		}
+	}
+} catch (e) {
+	console.error('Failed to load graph.md:', e);
+}
+
+let homeConfig = {
+	title: 'Second Brain',
+	description: 'Knowledge graph of all notes',
+	contentHtml: '',
+};
+
+try {
+	const res = await fetch('https://files.obsidianos.xyz/~robin/blog/content/home.md');
+	if (res.ok) {
+		const content = await res.text();
+		const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
+		if (frontmatterMatch) {
+			const fm = frontmatterMatch[1];
+			const titleMatch = fm.match(/^title:\s*(.+)$/m);
+			if (titleMatch) homeConfig.title = titleMatch[1].trim().replace(/['"]/g, '');
+			const descMatch = fm.match(/^description:\s*(.+)$/m);
+			if (descMatch) homeConfig.description = descMatch[1].trim().replace(/['"]/g, '');
+		}
+		homeConfig.contentHtml = renderMarkdownToHtml(content, '/blog');
+	}
+} catch (e) {
+	console.error('Failed to load home.md:', e);
+}
+---
+
+<Layout title={homeConfig.title} description={homeConfig.description}>
+	<section class="wrap section">
+		<header class="section-head">
+			<p class="label">// second brain</p>
+			<h2 class="display section-title">{homeConfig.title}</h2>
+		</header>
+		{homeConfig.contentHtml && (
+			<div class="prose" set:html={homeConfig.contentHtml} style="margin-bottom: 2rem;" />
+		)}
+		<Graph {nodes} {links} />
+	</section>
+</Layout>
