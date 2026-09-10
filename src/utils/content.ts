@@ -3,7 +3,7 @@ import { join, extname, basename } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
-const CONTENT_DIR = join(__dirname, '..', 'content');
+const CONTENT_DIR = join(process.cwd(), 'content');
 
 const USER_AGENT =
 	'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36';

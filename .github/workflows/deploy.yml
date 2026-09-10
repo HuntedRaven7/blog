@@ -19,11 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: HuntedRaven7/content
+          path: content
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - run: npm ci
-      - run: node sync-content.js
       - run: npm run build
       - uses: actions/upload-pages-artifact@v4
         with:
