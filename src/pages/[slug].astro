@@ -20,6 +20,19 @@ function extractMarkdownFiles(html: string): string[] {
 export async function getStaticPaths() {
 	const EXCLUDED_SLUGS = new Set(['home', 'sidebar', 'top', 'gallery-intro', 'graph']);
 	const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
+	function extractMarkdownFiles(html: string): string[] {
+		const regex = /<a href="([^"]+\.md)"/g;
+		const files: string[] = [];
+		let match;
+		while ((match = regex.exec(html)) !== null) {
+			const href = match[1];
+			const name = href.split('/').pop() || href;
+			if (name.endsWith('.md')) {
+				files.push(name);
+			}
+		}
+		return files;
+	}
 	try {
 		const { getLocalMarkdownFiles } = await import('../utils/content.ts');
 		const localFiles = getLocalMarkdownFiles()
