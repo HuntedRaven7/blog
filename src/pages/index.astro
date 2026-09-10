@@ -8,44 +8,36 @@ import { readLocalMarkdown } from '../utils/content.ts';
 const notes = await getNotes();
 const noteMap = new Map(notes.map((n) => [n.slug, n]));
 
-const nodes: NoteNode[] = notes.map((n) => ({ id: n.slug, title: n.title, excerpt: n.excerpt }));
+const graphSlugs = new Set<string>();
+const rawLinks: { source: string; target: string }[] = [];
 
-const links: GraphLink[] = [];
 try {
 	const localGraph = readLocalMarkdown('graph');
-	if (localGraph) {
-		const lines = localGraph.split('\n');
-		for (const line of lines) {
-			const match = line.match(/^(.+?)\s*->\s*(.+)$/);
-			if (match) {
-				const source = match[1].trim().replace(/^\/+/, '').replace(/\.md$/, '');
-				const target = match[2].trim().replace(/^\/+/, '').replace(/\.md$/, '');
-				if (noteMap.has(source) && noteMap.has(target)) {
-					links.push({ source, target });
-				}
-			}
-		}
-	} else {
-		const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
-		const res = await fetch(`${CONTENT_BASE}/graph.md`);
-		if (res.ok) {
-			const content = await res.text();
-			const lines = content.split('\n');
-			for (const line of lines) {
-				const match = line.match(/^(.+?)\s*->\s*(.+)$/);
-				if (match) {
-					const source = match[1].trim().replace(/^\/+/, '').replace(/\.md$/, '');
-					const target = match[2].trim().replace(/^\/+/, '').replace(/\.md$/, '');
-					if (noteMap.has(source) && noteMap.has(target)) {
-						links.push({ source, target });
-					}
-				}
-			}
+	const graphSource = localGraph || (await (await fetch('https://files.obsidianos.xyz/~robin/blog/content/graph.md')).text());
+	const lines = graphSource.split('\n');
+	for (const line of lines) {
+		const match = line.match(/^(.+?)\s*->\s*(.+)$/);
+		if (match) {
+			const source = match[1].trim().replace(/^\/+/, '').replace(/\.md$/, '');
+			const target = match[2].trim().replace(/^\/+/, '').replace(/\.md$/, '');
+			graphSlugs.add(source);
+			graphSlugs.add(target);
+			rawLinks.push({ source, target });
 		}
 	}
 } catch (e) {
 	console.error('Failed to load graph.md:', e);
 }
+
+const nodes: NoteNode[] = notes.map((n) => ({ id: n.slug, title: n.title, excerpt: n.excerpt }));
+for (const slug of graphSlugs) {
+	if (!noteMap.has(slug)) {
+		nodes.push({ id: slug, title: slug, excerpt: '' });
+	}
+}
+
+const nodeIds = new Set(nodes.map((n) => n.id));
+const links: GraphLink[] = rawLinks.filter((l) => nodeIds.has(l.source) && nodeIds.has(l.target));
 
 let homeConfig = {
 	title: 'Second Brain',
