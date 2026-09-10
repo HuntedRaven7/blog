@@ -27,12 +27,10 @@ A blazingly fast, minimal wiki engine that doesn't suck.
 1. Copy `config.json.def` to `config.json`
 2. Configure your settings
 3. Place Markdown files in `content/` directory
-4. Serve with any static web server, or use the bundled Node.js server for feed support:
-
-```bash
-npm install
-npm start
-```
+4. Run with Node.js:
+   ```bash
+   node server.js
+   ```
 
 ## Configuration
 

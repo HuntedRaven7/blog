@@ -22,5 +22,9 @@
   {
     "slug": "music",
     "title": "Music Box"
+  },
+  {
+    "slug": "need-of-buildstream",
+    "title": "The new need of Buildstream"
   }
 ]
