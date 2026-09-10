@@ -2,35 +2,45 @@
 import { SITE_TITLE } from '../consts';
 import { processMarkdown } from '../utils/markdown';
 import siteIcon from '../assets/site-icon.jpg';
+import { readLocalMarkdown } from '../utils/content.ts';
 import ViewCounter from './ViewCounter.astro';
 
 const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
 
 let sidebarLinks: { href: string; text: string }[] = [];
 
-try {
-	const res = await fetch(`${CONTENT_BASE}/sidebar.md`);
-	if (res.ok) {
-		const content = await res.text();
-		const lines = content.split('\n');
-		let idx = 0;
-		for (const line of lines) {
-			const match = line.match(/^\s*\[([^\]]+)\]\(([^)]+)\)\s*$/);
-			if (match) {
-				idx++;
-				const text = match[1].trim();
-				let href = match[2].trim();
-				if (href.startsWith('http://') || href.startsWith('https://')) {
-					// keep external links as-is
-				} else if (href.startsWith('/')) {
-					const cleaned = href.replace(/^\/+/, '');
-					const slug = cleaned === 'home' ? '' : cleaned;
-					href = `/blog/${slug}`;
-				} else {
-					href = `/blog/${href}`;
-				}
-				sidebarLinks.push({ href, text });
+function parseSidebar(content: string): { href: string; text: string }[] {
+	const lines = content.split('\n');
+	const links: { href: string; text: string }[] = [];
+	for (const line of lines) {
+		const match = line.match(/^\s*\[([^\]]+)\]\(([^)]+)\)\s*$/);
+		if (match) {
+			const text = match[1].trim();
+			let href = match[2].trim();
+			if (href.startsWith('http://') || href.startsWith('https://')) {
+				// keep external links as-is
+			} else if (href.startsWith('/')) {
+				const cleaned = href.replace(/^\/+/, '');
+				const slug = cleaned === 'home' ? '' : cleaned;
+				href = `/blog/${slug}`;
+			} else {
+				href = `/blog/${href}`;
 			}
+			links.push({ href, text });
+		}
+	}
+	return links;
+}
+
+try {
+	const localContent = readLocalMarkdown('sidebar');
+	if (localContent) {
+		sidebarLinks = parseSidebar(localContent);
+	} else {
+		const res = await fetch(`${CONTENT_BASE}/sidebar.md`);
+		if (res.ok) {
+			const content = await res.text();
+			sidebarLinks = parseSidebar(content);
 		}
 	}
 } catch (e) {

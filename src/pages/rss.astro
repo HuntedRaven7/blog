@@ -21,6 +21,20 @@ function extractMarkdownFiles(html: string): string[] {
 async function getMarkdownFiles() {
 	const EXCLUDED = new Set(['home', 'sidebar', 'top', 'gallery-intro', 'graph']);
 	try {
+		const { getLocalMarkdownFiles, readLocalMarkdown } = await import('../utils/content.ts');
+		const localFiles = getLocalMarkdownFiles()
+			.filter((f) => !EXCLUDED.has(f))
+			.map((f) => {
+				const slug = f.replace('.md', '');
+				const content = readLocalMarkdown(slug) || '';
+				const title = extractTitle(content) || slug;
+				return { slug, title };
+			});
+
+		if (localFiles.length > 0) {
+			return localFiles;
+		}
+
 		const indexRes = await fetch(CONTENT_BASE);
 		if (!indexRes.ok) throw new Error(`Failed to fetch index: ${indexRes.status}`);
 		const indexHtml = await indexRes.text();
@@ -34,12 +48,11 @@ async function getMarkdownFiles() {
 				if (!contentRes.ok) throw new Error(`Failed to fetch ${f}`);
 				const content = await contentRes.text();
 				const title = extractTitle(content) || slug;
-				const pubDate = contentRes.headers.get('last-modified') || new Date().toISOString();
-				return { slug, title, pubDate: new Date(pubDate) };
+				return { slug, title };
 			})
 		);
 
-		return posts.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
+		return posts;
 	} catch (e) {
 		console.error('Failed to load markdown files from remote:', e);
 		return [];
@@ -58,7 +71,7 @@ const blogFiles = await getMarkdownFiles();
 		<div class="rows">
 			{blogFiles.map((post) => (
 				<a class="row row-link link" href={`/blog/${post.slug}`}>
-					<span class="label row-date">{post.pubDate.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.')}</span>
+					<span class="label row-date">{new Date().toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.')}</span>
 					<div>
 						<span class="display row-title">{post.title}</span>
 					</div>

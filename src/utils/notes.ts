@@ -5,7 +5,7 @@ export interface NoteNode {
 	excerpt: string;
 }
 
-const EXCLUDED = new Set(['sidebar', 'top', 'gallery-intro', 'graph']);
+const EXCLUDED = new Set(['home', 'sidebar', 'top', 'gallery-intro', 'graph']);
 const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
 
 async function fetchText(url: string): Promise<string> {
@@ -44,6 +44,21 @@ function extractMarkdownFiles(html: string): string[] {
 
 export async function getNotes(): Promise<NoteNode[]> {
 	try {
+		const { getLocalMarkdownFiles, readLocalMarkdown } = await import('./content.ts');
+		const localFiles = getLocalMarkdownFiles()
+			.filter((f) => !EXCLUDED.has(f))
+			.map((f) => f.replace('.md', ''));
+
+		if (localFiles.length > 0) {
+			return localFiles.map((slug) => {
+				const content = readLocalMarkdown(slug) || '';
+				const title = parseTitle(content) || slug;
+				const links = parseLinks(content);
+				const excerpt = parseExcerpt(content);
+				return { slug, title, links, excerpt };
+			});
+		}
+
 		const indexHtml = await fetchText(CONTENT_BASE);
 		const files = extractMarkdownFiles(indexHtml)
 			.filter((f) => !EXCLUDED.has(f.replace('.md', '')));
@@ -61,7 +76,7 @@ export async function getNotes(): Promise<NoteNode[]> {
 
 		return notes;
 	} catch (e) {
-		console.error('Failed to load notes from remote:', e);
+		console.error('Failed to load notes:', e);
 		return [];
 	}
 }

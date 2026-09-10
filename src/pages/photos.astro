@@ -20,17 +20,30 @@ function extractFiles(html: string): string[] {
 let images: { filename: string; url: string }[] = [];
 
 try {
-	const indexRes = await fetch(`${CONTENT_BASE}/images/`);
-	if (indexRes.ok) {
-		const indexHtml = await indexRes.text();
-		const files = extractFiles(indexHtml)
-			.filter((f) => /\.(png|jpe?g|gif|webp|svg)$/i.test(f))
-			.map((f) => ({
-				filename: f,
-				url: `/blog/images/${f}`,
-			}))
-			.sort((a, b) => a.filename.localeCompare(b.filename));
-		images = files;
+	const { getLocalImageFiles } = await import('../utils/content.ts');
+	const localImages = getLocalImageFiles()
+		.filter((f) => /\.(png|jpe?g|gif|webp|svg)$/i.test(f))
+		.map((f) => ({
+			filename: f,
+			url: `/blog/images/${f}`,
+		}))
+		.sort((a, b) => a.filename.localeCompare(b.filename));
+	
+	if (localImages.length > 0) {
+		images = localImages;
+	} else {
+		const indexRes = await fetch(`${CONTENT_BASE}/images/`);
+		if (indexRes.ok) {
+			const indexHtml = await indexRes.text();
+			const files = extractFiles(indexHtml)
+				.filter((f) => /\.(png|jpe?g|gif|webp|svg)$/i.test(f))
+				.map((f) => ({
+					filename: f,
+					url: `/blog/images/${f}`,
+				}))
+				.sort((a, b) => a.filename.localeCompare(b.filename));
+			images = files;
+		}
 	}
 } catch (e) {
 	console.error('Failed to load images:', e);

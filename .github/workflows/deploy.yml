@@ -23,6 +23,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci
+      - run: node sync-content.js
       - run: npm run build
       - uses: actions/upload-pages-artifact@v4
         with:

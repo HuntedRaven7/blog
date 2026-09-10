@@ -3,30 +3,42 @@ const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
 
 let topLinks: { href: string; text: string }[] = [];
 
-try {
-	const res = await fetch(`${CONTENT_BASE}/top.md`);
-	if (res.ok) {
-		const content = await res.text();
-		const lines = content.split('\n');
-		for (const line of lines) {
-			const parts = line.split('%GAP%');
-			for (const part of parts) {
-				const match = part.trim().match(/^\s*\[([^\]]+)\]\(([^)]+)\)\s*$/);
-				if (match) {
-					const text = match[1].trim();
-					let href = match[2].trim();
-					if (href.startsWith('http://') || href.startsWith('https://')) {
-						// keep external links as-is
-					} else if (href.startsWith('/')) {
-						const cleaned = href.replace(/^\/+/, '');
-						const slug = cleaned === 'home' ? '' : cleaned;
-						href = `/blog/${slug}`;
-					} else {
-						href = `/blog/${href}`;
-					}
-					topLinks.push({ href, text });
+function parseTop(content: string): { href: string; text: string }[] {
+	const lines = content.split('\n');
+	const links: { href: string; text: string }[] = [];
+	for (const line of lines) {
+		const parts = line.split('%GAP%');
+		for (const part of parts) {
+			const match = part.trim().match(/^\s*\[([^\]]+)\]\(([^)]+)\)\s*$/);
+			if (match) {
+				const text = match[1].trim();
+				let href = match[2].trim();
+				if (href.startsWith('http://') || href.startsWith('https://')) {
+					// keep external links as-is
+				} else if (href.startsWith('/')) {
+					const cleaned = href.replace(/^\/+/, '');
+					const slug = cleaned === 'home' ? '' : cleaned;
+					href = `/blog/${slug}`;
+				} else {
+					href = `/blog/${href}`;
 				}
+				links.push({ href, text });
 			}
+		}
+	}
+	return links;
+}
+
+try {
+	const { readLocalMarkdown } = await import('../utils/content.ts');
+	const localContent = readLocalMarkdown('top');
+	if (localContent) {
+		topLinks = parseTop(localContent);
+	} else {
+		const res = await fetch(`${CONTENT_BASE}/top.md`);
+		if (res.ok) {
+			const content = await res.text();
+			topLinks = parseTop(content);
 		}
 	}
 } catch (e) {

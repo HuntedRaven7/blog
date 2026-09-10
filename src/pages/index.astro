@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { getNotes } from '../utils/notes';
 import Graph, { type NoteNode, type GraphLink } from '../components/Graph.astro';
 import { renderMarkdownToHtml } from '../utils/markdown';
+import { readLocalMarkdown } from '../utils/content.ts';
 
 const notes = await getNotes();
 const noteMap = new Map(notes.map((n) => [n.slug, n]));
@@ -11,7 +12,8 @@ const nodes: NoteNode[] = notes.map((n) => ({ id: n.slug, title: n.title, excerp
 
 const links: GraphLink[] = [];
 try {
-	const res = await fetch('https://files.obsidianos.xyz/~robin/blog/content/graph.md');
+	const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
+	const res = await fetch(`${CONTENT_BASE}/graph.md`);
 	if (res.ok) {
 		const content = await res.text();
 		const lines = content.split('\n');
@@ -36,22 +38,35 @@ let homeConfig = {
 	contentHtml: '',
 };
 
-try {
-	const res = await fetch('https://files.obsidianos.xyz/~robin/blog/content/home.md');
-	if (res.ok) {
-		const content = await res.text();
-		const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
-		if (frontmatterMatch) {
-			const fm = frontmatterMatch[1];
-			const titleMatch = fm.match(/^title:\s*(.+)$/m);
-			if (titleMatch) homeConfig.title = titleMatch[1].trim().replace(/['"]/g, '');
-			const descMatch = fm.match(/^description:\s*(.+)$/m);
-			if (descMatch) homeConfig.description = descMatch[1].trim().replace(/['"]/g, '');
-		}
-		homeConfig.contentHtml = renderMarkdownToHtml(content, '/blog');
+const localHome = readLocalMarkdown('home');
+if (localHome) {
+	const frontmatterMatch = localHome.match(/^---\s*\n([\s\S]*?)\n---/);
+	if (frontmatterMatch) {
+		const fm = frontmatterMatch[1];
+		const titleMatch = fm.match(/^title:\s*(.+)$/m);
+		if (titleMatch) homeConfig.title = titleMatch[1].trim().replace(/['"]/g, '');
+		const descMatch = fm.match(/^description:\s*(.+)$/m);
+		if (descMatch) homeConfig.description = descMatch[1].trim().replace(/['"]/g, '');
 	}
-} catch (e) {
-	console.error('Failed to load home.md:', e);
+	homeConfig.contentHtml = renderMarkdownToHtml(localHome, '/blog');
+} else {
+	try {
+		const res = await fetch('https://files.obsidianos.xyz/~robin/blog/content/home.md');
+		if (res.ok) {
+			const content = await res.text();
+			const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
+			if (frontmatterMatch) {
+				const fm = frontmatterMatch[1];
+				const titleMatch = fm.match(/^title:\s*(.+)$/m);
+				if (titleMatch) homeConfig.title = titleMatch[1].trim().replace(/['"]/g, '');
+				const descMatch = fm.match(/^description:\s*(.+)$/m);
+				if (descMatch) homeConfig.description = descMatch[1].trim().replace(/['"]/g, '');
+			}
+			homeConfig.contentHtml = renderMarkdownToHtml(content, '/blog');
+		}
+	} catch (e) {
+		console.error('Failed to load home.md:', e);
+	}
 }
 ---
 
