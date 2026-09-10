@@ -1,0 +1,6 @@
+[Home](/home)
+[Second Brain](/graph)
+[Music](/music)
+[Photos](/photos)
+[Bluefins New Maintainer](/bluefin-maintainer)
+[Gender Journey](/genderjourney)
