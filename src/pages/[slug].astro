@@ -3,6 +3,8 @@ import Layout from '../layouts/Layout.astro';
 import { renderMarkdownToHtml, extractTitle } from '../utils/markdown';
 import { readLocalMarkdown } from '../utils/content.ts';
 
+const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
+
 function extractMarkdownFiles(html: string): string[] {
 	const regex = /<a href="([^"]+\.md)"/g;
 	const files: string[] = [];
