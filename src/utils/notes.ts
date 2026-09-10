@@ -55,14 +55,14 @@ export async function getNotes(): Promise<NoteNode[]> {
 			});
 		}
 
-		const indexHtml = await fetchText(CONTENT_BASE);
+		const indexHtml = await fetchWithHeaders(CONTENT_BASE);
 		const files = extractMarkdownFiles(indexHtml)
 			.filter((f) => !EXCLUDED.has(f.replace('.md', '')));
 
 		const notes = await Promise.all(
 			files.map(async (f) => {
 				const slug = f.replace('.md', '');
-				const content = await fetchText(`${CONTENT_BASE}/${f}`);
+				const content = await fetchWithHeaders(`${CONTENT_BASE}/${f}`);
 				const title = parseTitle(content) || slug;
 				const links = parseLinks(content);
 				const excerpt = parseExcerpt(content);
