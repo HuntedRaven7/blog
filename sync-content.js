@@ -8,8 +8,16 @@ const REMOTE_BASE = "https://files.obsidianos.xyz/~robin/blog/content";
 
 const EXCLUDED = new Set(["graph.md", "sidebar.md", "top.md", "home.md", "gallery-intro.md"]);
 
+const USER_AGENT =
+	'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36';
+
 async function fetchText(url) {
-  const res = await fetch(url);
+  const res = await fetch(url, {
+    headers: {
+      'User-Agent': USER_AGENT,
+      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    },
+  });
   if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
   return res.text();
 }

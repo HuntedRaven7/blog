@@ -13,7 +13,7 @@ const rawLinks: { source: string; target: string }[] = [];
 
 try {
 	const localGraph = readLocalMarkdown('graph');
-	const graphSource = localGraph || (await (await fetchWithHeaders('https://files.obsidianos.xyz/~robin/blog/content/graph.md')).text());
+	const graphSource = localGraph || await fetchWithHeaders('https://files.obsidianos.xyz/~robin/blog/content/graph.md');
 	const lines = graphSource.split('\n');
 	for (const line of lines) {
 		const match = line.match(/^(.+?)\s*->\s*(.+)$/);
@@ -57,23 +57,20 @@ if (localHome) {
 	}
 	homeConfig.contentHtml = renderMarkdownToHtml(localHome, '/blog');
 } else {
-	try {
-		const res = await fetchWithHeaders('https://files.obsidianos.xyz/~robin/blog/content/home.md');
-		if (res.ok) {
-			const content = await res.text();
-			const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
-			if (frontmatterMatch) {
-				const fm = frontmatterMatch[1];
-				const titleMatch = fm.match(/^title:\s*(.+)$/m);
-				if (titleMatch) homeConfig.title = titleMatch[1].trim().replace(/['"]/g, '');
-				const descMatch = fm.match(/^description:\s*(.+)$/m);
-				if (descMatch) homeConfig.description = descMatch[1].trim().replace(/['"]/g, '');
-			}
-			homeConfig.contentHtml = renderMarkdownToHtml(content, '/blog');
-		}
-	} catch (e) {
-		console.error('Failed to load home.md:', e);
-	}
+  try {
+    const content = await fetchWithHeaders('https://files.obsidianos.xyz/~robin/blog/content/home.md');
+    const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
+    if (frontmatterMatch) {
+      const fm = frontmatterMatch[1];
+      const titleMatch = fm.match(/^title:\s*(.+)$/m);
+      if (titleMatch) homeConfig.title = titleMatch[1].trim().replace(/['"]/g, '');
+      const descMatch = fm.match(/^description:\s*(.+)$/m);
+      if (descMatch) homeConfig.description = descMatch[1].trim().replace(/['"]/g, '');
+    }
+    homeConfig.contentHtml = renderMarkdownToHtml(content, '/blog');
+  } catch (e) {
+    console.error('Failed to load home.md:', e);
+  }
 }
 ---
 

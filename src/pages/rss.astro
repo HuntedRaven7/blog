@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { extractTitle } from '../utils/markdown';
+import { getLocalMarkdownFiles, readLocalMarkdown, fetchWithHeaders } from '../utils/content.ts';
 
 const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
 
@@ -35,7 +36,7 @@ async function getMarkdownFiles() {
 			return localFiles;
 		}
 
-		const indexRes = await fetch(CONTENT_BASE);
+		const indexRes = await fetchWithHeaders(CONTENT_BASE);
 		if (!indexRes.ok) throw new Error(`Failed to fetch index: ${indexRes.status}`);
 		const indexHtml = await indexRes.text();
 		const files = extractMarkdownFiles(indexHtml)
@@ -44,7 +45,7 @@ async function getMarkdownFiles() {
 		const posts = await Promise.all(
 			files.map(async (f) => {
 				const slug = f.replace('.md', '');
-				const contentRes = await fetch(`${CONTENT_BASE}/${f}`);
+				const contentRes = await fetchWithHeaders(`${CONTENT_BASE}/${f}`);
 				if (!contentRes.ok) throw new Error(`Failed to fetch ${f}`);
 				const content = await contentRes.text();
 				const title = extractTitle(content) || slug;

@@ -47,9 +47,7 @@ export async function getStaticPaths() {
 			}));
 		}
 
-		const indexRes = await fetchWithHeaders(CONTENT_BASE);
-		if (!indexRes.ok) throw new Error(`Failed to fetch index: ${indexRes.status}`);
-		const indexHtml = await indexRes.text();
+		const indexHtml = await fetchWithHeaders(CONTENT_BASE);
 		const files = extractMarkdownFiles(indexHtml)
 			.filter((f) => !EXCLUDED_SLUGS.has(f.replace('.md', '')));
 		return files.map((f) => ({
