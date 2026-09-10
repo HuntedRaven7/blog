@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { renderMarkdownToHtml, extractTitle } from '../utils/markdown';
-import { readLocalMarkdown } from '../utils/content.ts';
+import { readLocalMarkdown, fetchWithHeaders } from '../utils/content.ts';
 
 const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
 
@@ -47,7 +47,7 @@ export async function getStaticPaths() {
 			}));
 		}
 
-		const indexRes = await fetch(CONTENT_BASE);
+		const indexRes = await fetchWithHeaders(CONTENT_BASE);
 		if (!indexRes.ok) throw new Error(`Failed to fetch index: ${indexRes.status}`);
 		const indexHtml = await indexRes.text();
 		const files = extractMarkdownFiles(indexHtml)
@@ -71,7 +71,7 @@ async function getPostBySlug(slug: string) {
 	}
 
 	try {
-		const contentRes = await fetch(`${CONTENT_BASE}/${slug}.md`);
+		const contentRes = await fetchWithHeaders(`${CONTENT_BASE}/${slug}.md`);
 		if (!contentRes.ok) throw new Error(`Failed to fetch post: ${contentRes.status}`);
 		const content = await contentRes.text();
 		const title = extractTitle(content) || slug;

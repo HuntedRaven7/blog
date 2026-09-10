@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { getNotes } from '../utils/notes';
 import Graph, { type NoteNode, type GraphLink } from '../components/Graph.astro';
 import { renderMarkdownToHtml } from '../utils/markdown';
-import { readLocalMarkdown } from '../utils/content.ts';
+import { readLocalMarkdown, fetchWithHeaders } from '../utils/content.ts';
 
 const notes = await getNotes();
 const noteMap = new Map(notes.map((n) => [n.slug, n]));
@@ -13,7 +13,7 @@ const rawLinks: { source: string; target: string }[] = [];
 
 try {
 	const localGraph = readLocalMarkdown('graph');
-	const graphSource = localGraph || (await (await fetch('https://files.obsidianos.xyz/~robin/blog/content/graph.md')).text());
+	const graphSource = localGraph || (await (await fetchWithHeaders('https://files.obsidianos.xyz/~robin/blog/content/graph.md')).text());
 	const lines = graphSource.split('\n');
 	for (const line of lines) {
 		const match = line.match(/^(.+?)\s*->\s*(.+)$/);
@@ -58,7 +58,7 @@ if (localHome) {
 	homeConfig.contentHtml = renderMarkdownToHtml(localHome, '/blog');
 } else {
 	try {
-		const res = await fetch('https://files.obsidianos.xyz/~robin/blog/content/home.md');
+		const res = await fetchWithHeaders('https://files.obsidianos.xyz/~robin/blog/content/home.md');
 		if (res.ok) {
 			const content = await res.text();
 			const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
