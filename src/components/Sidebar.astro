@@ -37,7 +37,7 @@ try {
 	if (localContent) {
 		sidebarLinks = parseSidebar(localContent);
 	} else {
-		const res = await fetch(`${CONTENT_BASE}/sidebar.md`);
+		const res = await fetchWithHeaders(`${CONTENT_BASE}/sidebar.md`);
 		if (res.ok) {
 			const content = await res.text();
 			sidebarLinks = parseSidebar(content);
