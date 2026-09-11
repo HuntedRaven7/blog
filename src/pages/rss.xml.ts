@@ -1,9 +1,15 @@
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import { getLocalMarkdownFiles, readLocalMarkdown } from '../utils/content.ts';
 
 const CONTENT_BASE = 'https://files.obsidianos.xyz/~robin/blog/content';
 
 async function fetchText(url: string): Promise<string> {
-	const res = await fetch(url);
+	const res = await fetch(url, {
+		headers: {
+			'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36',
+			Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+		},
+	});
 	if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
 	return res.text();
 }
@@ -34,14 +40,29 @@ function escapeXml(str: string): string {
 export async function GET() {
 	const EXCLUDED = new Set(['home', 'sidebar', 'top', 'gallery-intro', 'graph']);
 	try {
-		const indexHtml = await fetchText(CONTENT_BASE);
-		const files = extractMarkdownFiles(indexHtml)
-			.filter((f) => !EXCLUDED.has(f.replace('.md', '')));
+		const localFiles = getLocalMarkdownFiles().filter((f) => !EXCLUDED.has(f));
+		let files: string[] = [];
+		let useRemote = false;
+
+		if (localFiles.length > 0) {
+			files = localFiles.map((f) => `${f}.md`);
+		} else {
+			useRemote = true;
+			const indexHtml = await fetchText(CONTENT_BASE);
+			const remoteFiles = extractMarkdownFiles(indexHtml);
+			files = remoteFiles.filter((f) => !EXCLUDED.has(f.replace('.md', '')));
+		}
 
 		const items = await Promise.all(
 			files.map(async (f) => {
 				const slug = f.replace('.md', '');
-				const content = await fetchText(`${CONTENT_BASE}/${f}`);
+				let content: string;
+				if (useRemote) {
+					content = await fetchText(`${CONTENT_BASE}/${f}`);
+				} else {
+					const local = readLocalMarkdown(slug);
+					content = local || '';
+				}
 				const titleMatch = content.match(/^#\s+(.+)$/m);
 				const title = titleMatch ? titleMatch[1].trim() : slug;
 				const description = content.slice(0, 200).replace(/[#*_`]/g, '').trim();
